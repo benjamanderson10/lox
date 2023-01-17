@@ -1,1 +1,1 @@
-/home/benjamanderson/Documents/Projects/lox/rlox/target/debug/rlox: /home/benjamanderson/Documents/Projects/lox/rlox/src/main.rs
+/home/benjamanderson/Documents/Projects/lox/rlox/target/debug/rlox: /home/benjamanderson/Documents/Projects/lox/rlox/src/error.rs /home/benjamanderson/Documents/Projects/lox/rlox/src/main.rs /home/benjamanderson/Documents/Projects/lox/rlox/src/scanner.rs /home/benjamanderson/Documents/Projects/lox/rlox/src/token.rs

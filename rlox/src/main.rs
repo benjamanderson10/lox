@@ -1,9 +1,6 @@
-use std::{path::PathBuf, env};
+use std::{env, io::Write};
 
-
-
-
-
+use crate::scanner::Scanner;
 
 
 fn main() {
@@ -28,12 +25,27 @@ fn repl() {
     println!();
     loop {
         let mut input = String::new();
-        print!(">");
+        let mut s = std::io::stdout();
+        let mut h = s.lock();
+        h.write_all(b"> ").unwrap();
+        s.flush().unwrap();
+        
         std::io::stdin().read_line(&mut input).unwrap();
         run(&input);
     }
 }
 
 fn run(source: &String) {
-    println!("*{}*", source);
+    let mut s = Scanner::new(source);
+    s.scan();
+    for error in s.errors {
+        error.report();
+    }
 }
+
+
+pub mod error;
+
+pub mod scanner;
+
+pub mod token;
