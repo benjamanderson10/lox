@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-pub struct Error <T: Display>{
+pub struct Error<T: Display> {
     pub line: usize,
     pub column: usize,
     pub message: T,

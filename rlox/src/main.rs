@@ -2,17 +2,16 @@ use std::{env, io::Write};
 
 use crate::scanner::Scanner;
 
-
 fn main() {
     let args: Vec<String> = env::args().collect();
     let path = args.get(1);
     match path {
-       Some(n) => {
-           runfile(&n);
-       },
-       None => {
-           repl();
-       },
+        Some(n) => {
+            runfile(&n);
+        }
+        None => {
+            repl();
+        }
     }
 }
 
@@ -29,7 +28,7 @@ fn repl() {
         let mut h = s.lock();
         h.write_all(b"> ").unwrap();
         s.flush().unwrap();
-        
+
         std::io::stdin().read_line(&mut input).unwrap();
         run(&input);
     }
@@ -42,7 +41,6 @@ fn run(source: &String) {
         error.report();
     }
 }
-
 
 pub mod error;
 

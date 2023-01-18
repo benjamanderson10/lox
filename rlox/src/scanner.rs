@@ -16,10 +16,6 @@ impl<'a> Scanner<'a> {
     
     pub fn scan(&mut self) {
         let mut idx: usize = 0;
-
-        for (line, lines) in self.source.lines().enumerate() {
-            for (column, c) in lines.chars().enumerate() {
-                match c {
                     
                     // Single
                     '(' => { self.tokens.push(Token { tokentype: TokenType::LeftParen, idx, offset: 1}) },
@@ -30,13 +26,12 @@ impl<'a> Scanner<'a> {
                     '}' => { self.tokens.push(Token { tokentype: TokenType::RightCurlyBrace, idx, offset: 1}) },
                     ',' => { self.tokens.push(Token { tokentype: TokenType::Comma, idx, offset: 1}) },
                     '.' => { self.tokens.push(Token { tokentype: TokenType::Dot, idx, offset: 1}) },
-                    '-' => { self.tokens.push(Token { tokentype: TokenType::Minus, idx, offset: 1}) },
-                    '+' => { self.tokens.push(Token { tokentype: TokenType::Plus, idx, offset: 1}) },
                     ';' => { self.tokens.push(Token { tokentype: TokenType::Semicolon, idx, offset: 1}) },
                     '/' => { self.tokens.push(Token { tokentype: TokenType::Slash, idx, offset: 1}) },
                     '*' => { self.tokens.push(Token { tokentype: TokenType::Star, idx, offset: 1}) },
 
                     // Double
+                    '+' => { self.tokens.push(Token { tokentype: TokenType::LeftParen, idx, offset: 1}) },
                     '-' => { self.tokens.push(Token { tokentype: TokenType::LeftParen, idx, offset: 1}) },
                     '-' => { self.tokens.push(Token { tokentype: TokenType::LeftParen, idx, offset: 1}) },
                     '-' => { self.tokens.push(Token { tokentype: TokenType::LeftParen, idx, offset: 1}) },
@@ -46,17 +41,18 @@ impl<'a> Scanner<'a> {
                     '-' => { self.tokens.push(Token { tokentype: TokenType::LeftParen, idx, offset: 1}) },
                     '-' => { self.tokens.push(Token { tokentype: TokenType::LeftParen, idx, offset: 1}) },
                     '-' => { self.tokens.push(Token { tokentype: TokenType::LeftParen, idx, offset: 1}) },
-                    '-' => { self.tokens.push(Token { tokentype: TokenType::LeftParen, idx, offset: 1}) },
-                    '-' => { self.tokens.push(Token { tokentype: TokenType::LeftParen, idx, offset: 1}) },
-                    '-' => { self.tokens.push(Token { tokentype: TokenType::LeftParen, idx, offset: 1}) },
+
+                    // Long
+                    '"' => { self.tokens.push(Token { tokentype: TokenType::LeftParen, idx, offset: 1}) },
+                    'a'..='z' | 'A'..='Z' | '_' => { 
+                        while 
+
+                        self.tokens.push(Token { tokentype: TokenType::Identifier(()), idx, offset: 1}) },
                     '-' => { self.tokens.push(Token { tokentype: TokenType::LeftParen, idx, offset: 1}) },
 
                     _ => { self.errors.push(Error { line, column, message: format!("Unexpected character '{}'", c)}) },
+                    idx += 1;
                 }
 
-                idx += 1;
-            }
-        }
     }
 
-}
