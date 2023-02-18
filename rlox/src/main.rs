@@ -1,6 +1,7 @@
 #![feature(associated_type_bounds)]
+#![allow(dead_code)]
 
-use std::{env, io::Write};
+use std::{io::Write};
 
 use expr::Expression::*;
 
