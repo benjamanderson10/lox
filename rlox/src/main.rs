@@ -22,6 +22,12 @@ fn main() {
         None => {
             repl();
         }
+        Some(n) => {
+            runfile(&n);
+        }
+        None => {
+            repl();
+        }
     }
     */
 }
@@ -39,6 +45,7 @@ fn repl() {
         let mut h = s.lock();
         h.write_all(b"> ").unwrap();
         s.flush().unwrap();
+
 
         std::io::stdin().read_line(&mut input).unwrap();
         run(&input);

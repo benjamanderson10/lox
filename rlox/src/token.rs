@@ -56,6 +56,20 @@ pub enum TokenType {
     This,
     Var,
     While,
+    Class,
+    Else,
+    False,
+    True,
+    Fn,
+    For,
+    If,
+    Nil,
+    Print,
+    Return,
+    Super,
+    This,
+    Var,
+    While,
 }
 
 #[derive(Debug)]
