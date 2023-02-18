@@ -1,19 +1,29 @@
+#![feature(associated_type_bounds)]
+
 use std::{env, io::Write};
 
-use crate::scanner::Scanner;
+use expr::Expression::*;
 
+use crate::{scanner::Scanner, parser::Parser, token::Token, token::TokenType, error::ErrorHandler};
 
 fn main() {
+    let mut e = ErrorHandler::<String>::new();
+    let mut p = Parser { errorhandler: &mut e, tokens: vec![Token { tokentype: TokenType::Number(6.0), src: "6"}, Token {tokentype: TokenType::Star, src: "*"}, Token {tokentype: TokenType::Number(6.0), src: "7"}, Token { tokentype: TokenType::Number(6.0), src: "6"}, Token {tokentype: TokenType::Star, src: "*"}, Token {tokentype: TokenType::Number(6.0), src: "7"}], expressions: vec![Operation(Box::new(Literal(Token { tokentype: TokenType::Number(6.0), src: "6"})), Token {tokentype: TokenType::Star, src: "*"}, Box::new(Literal(Token {tokentype: TokenType::Number(6.0), src: "7"})))]};
+    p.pretty_print();
+    p.parse();
+    /*
+
     let args: Vec<String> = env::args().collect();
     let path = args.get(1);
     match path {
-       Some(n) => {
-           runfile(&n);
-       },
-       None => {
-           repl();
-       },
+        Some(n) => {
+            runfile(&n);
+        }
+        None => {
+            repl();
+        }
     }
+    */
 }
 
 fn runfile(file: &String) {
@@ -29,23 +39,29 @@ fn repl() {
         let mut h = s.lock();
         h.write_all(b"> ").unwrap();
         s.flush().unwrap();
-        
+
         std::io::stdin().read_line(&mut input).unwrap();
         run(&input);
     }
 }
 
 fn run(source: &String) {
-    let mut s = Scanner::new(source);
+    let mut e = ErrorHandler::<String>::new();
+    let mut s = Scanner::new(source, &mut e);
     s.scan();
-    for error in s.errors {
-        error.report();
+    println!("num tokens: {}", s.tokens.len());
+    for token in s.tokens {
+        println!("{:?}", token);
     }
+    e.report_errors();
 }
-
 
 pub mod error;
 
+pub mod token;
+
 pub mod scanner;
 
-pub mod token;
+pub mod parser;
+
+pub mod expr;

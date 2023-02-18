@@ -1,30 +1,65 @@
-pub enum TokenType<'a> {
-    
+#[derive(Debug)]
+pub enum TokenType {
     // Single Char
-    LeftParen, RightParen,
-    LeftBrace, RightBrace,
-    LeftCurlyBrace, RightCurlyBrace,
-    Comma, Dot, Minus, Plus, Semicolon, Slash, Star,
+    LeftParen,
+    RightParen,
+    LeftBrace,
+    RightBrace,
+    LeftCurlyBrace,
+    RightCurlyBrace,
+    Comma,
+    Dot,
+    Semicolon,
+
 
     // Double
-    Bang, BangEqual,
-    Equal, EqualEqual,
-    Greater, GreaterEqual,
-    Less, LessEqual,
-    And, AndAnd,
-    Or, OrOr,
+    Minus,
+    MinusMinus,
+    MinusEqual,
+    Plus,
+    PlusPlus,
+    PlusEqual,
+    Star,
+    StarEqual,
+    Slash,
+    SlashEqual,
+    Bang,
+    BangEqual,
+    Equal,
+    EqualEqual,
+    Greater,
+    GreaterEqual,
+    Less,
+    LessEqual,
+    And,
+    AndAnd,
+    Or,
+    OrOr,
 
     // Literals
-    Identifier(&'a str),
-    String(&'a str),
-    Number(&'a str),
-    
+    Identifier(String),
+    String(String),
+    Number(f64),
+
     // Keywords
-    Class, Else, False, True, Fn, For, If, Nil, Print, Return, Super, This, Var, While,
+    Class,
+    Else,
+    False,
+    True,
+    Fn,
+    For,
+    If,
+    Nil,
+    Print,
+    Return,
+    Super,
+    This,
+    Var,
+    While,
 }
 
+#[derive(Debug)]
 pub struct Token<'a> {
-    pub tokentype: TokenType<'a>,
-    pub idx: usize,
-    pub offset: usize,
+    pub tokentype: TokenType,
+    pub src: &'a str,
 }
