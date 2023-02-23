@@ -11,38 +11,14 @@ pub mod parser;
 
 pub mod expr;
 
-use std::{io::Write, env};
+use std::{io::Write, env, cell::{Cell, RefCell}};
 
 use expr::Expr::*;
 
 use crate::{scanner::Scanner, parser::Parser, token::Token, token::TokenType, error::ErrorHandler};
 
 fn main() {
-    //*
-    let mut e = ErrorHandler::<String>::new();
-    let mut p = Parser {
-        errorhandler: &mut e,
-        tokens: vec![
-            Token { tokentype: TokenType::Number(6.0), src: "3"},
-            Token {tokentype: TokenType::Star, src: "+"},
-            Token {tokentype: TokenType::Number(6.0), src: "4"},
-            Token {tokentype: TokenType::Star, src: "*"},
-            Token {tokentype: TokenType::Number(6.0), src: "5"}],
-        expressions: vec![
-            Binary(
-                Box::new(Binary(
-                    Box::new(Literal(&Token { tokentype: TokenType::Number(6.0), src: "3"})),
-                    &Token {tokentype: TokenType::Star, src: "+"},
-                    Box::new(Literal(&Token {tokentype: TokenType::Number(6.0), src: "4"})))),
-                    &Token {tokentype: TokenType::Star, src: "*"},
-                Box::new(Literal(&Token {tokentype: TokenType::Number(6.0), src: "5"}))
-            )]};
-    p.pretty_print();
-    p.parse_expr();
-    //*/
 
-
-    /*
 
     let args: Vec<String> = env::args().collect();
     let path = args.get(1);
@@ -54,7 +30,7 @@ fn main() {
             repl();
         }
     }
-    */
+
 }
 
 fn runfile(file: &String) {
@@ -82,8 +58,12 @@ fn run(source: &String) {
     let mut s = Scanner::new(source, &mut e);
     s.scan();
     println!("num tokens: {}", s.tokens.len());
-    for token in s.tokens {
-        println!("{:?}", token);
+    for t in &s.tokens {
+        print!("{} ", t);
     }
+    println!();
+    let p = Parser { errorhandler: s.errors, tokens: s.tokens, expressions: RefCell::new(vec![]) };
+    p.parse_expr();
+    p.pretty_print();
     e.report_errors();
 }

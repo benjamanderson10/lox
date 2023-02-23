@@ -1,4 +1,7 @@
-#[derive(Debug)]
+use std::fmt::Display;
+use std::fmt;
+
+#[derive(Debug, PartialEq, PartialOrd)]
 pub enum TokenType {
     // Single Char
     LeftParen,
@@ -62,4 +65,10 @@ pub enum TokenType {
 pub struct Token<'a> {
     pub tokentype: TokenType,
     pub src: &'a str,
+}
+
+impl fmt::Display for Token<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.src)
+    }
 }

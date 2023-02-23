@@ -1,5 +1,1 @@
-// comment
-for(int i = 0; i < 10; i++) {
-// comment2
-@
-}
+a+b*c+d

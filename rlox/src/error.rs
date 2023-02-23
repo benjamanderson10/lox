@@ -16,7 +16,7 @@ impl<T: Display> ErrorHandler<T> {
     
     pub fn report_errors(&self){
         for error in &self.errors {
-            error.report();
+           error.report();
         }
     }
 }
