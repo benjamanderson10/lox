@@ -1,28 +1,52 @@
-#![feature(associated_type_bounds)]
 #![allow(dead_code)]
+#![allow(unused_imports)]
 
-use std::{io::Write};
+pub mod error;
 
-use expr::Expression::*;
+pub mod token;
+
+pub mod scanner;
+
+pub mod parser;
+
+pub mod expr;
+
+use std::{io::Write, env};
+
+use expr::Expr::*;
 
 use crate::{scanner::Scanner, parser::Parser, token::Token, token::TokenType, error::ErrorHandler};
 
 fn main() {
+    //*
     let mut e = ErrorHandler::<String>::new();
-    let mut p = Parser { errorhandler: &mut e, tokens: vec![Token { tokentype: TokenType::Number(6.0), src: "6"}, Token {tokentype: TokenType::Star, src: "*"}, Token {tokentype: TokenType::Number(6.0), src: "7"}, Token { tokentype: TokenType::Number(6.0), src: "6"}, Token {tokentype: TokenType::Star, src: "*"}, Token {tokentype: TokenType::Number(6.0), src: "7"}], expressions: vec![Operation(Box::new(Literal(Token { tokentype: TokenType::Number(6.0), src: "6"})), Token {tokentype: TokenType::Star, src: "*"}, Box::new(Literal(Token {tokentype: TokenType::Number(6.0), src: "7"})))]};
+    let mut p = Parser {
+        errorhandler: &mut e,
+        tokens: vec![
+            Token { tokentype: TokenType::Number(6.0), src: "3"},
+            Token {tokentype: TokenType::Star, src: "+"},
+            Token {tokentype: TokenType::Number(6.0), src: "4"},
+            Token {tokentype: TokenType::Star, src: "*"},
+            Token {tokentype: TokenType::Number(6.0), src: "5"}],
+        expressions: vec![
+            Binary(
+                Box::new(Binary(
+                    Box::new(Literal(&Token { tokentype: TokenType::Number(6.0), src: "3"})),
+                    &Token {tokentype: TokenType::Star, src: "+"},
+                    Box::new(Literal(&Token {tokentype: TokenType::Number(6.0), src: "4"})))),
+                    &Token {tokentype: TokenType::Star, src: "*"},
+                Box::new(Literal(&Token {tokentype: TokenType::Number(6.0), src: "5"}))
+            )]};
     p.pretty_print();
-    p.parse();
+    p.parse_expr();
+    //*/
+
+
     /*
 
     let args: Vec<String> = env::args().collect();
     let path = args.get(1);
     match path {
-        Some(n) => {
-            runfile(&n);
-        }
-        None => {
-            repl();
-        }
         Some(n) => {
             runfile(&n);
         }
@@ -63,13 +87,3 @@ fn run(source: &String) {
     }
     e.report_errors();
 }
-
-pub mod error;
-
-pub mod token;
-
-pub mod scanner;
-
-pub mod parser;
-
-pub mod expr;

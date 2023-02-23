@@ -1,10 +1,10 @@
 use crate::token::Token;
 
-
-pub enum Expression<'a> {
-    Literal(Token<'a>),
-    Unary(Token<'a>, Box<Expression<'a>>),
-    Binary(Box<Expression<'a>>, Token<'a>, Box<Expression<'a>>),
-    Grouping(Box<Expression<'a>>),
-    Operation(Box<Expression<'a>>, Token<'a>, Box<Expression<'a>>),
+pub enum Expr<'a> {
+    Grouping(Box<Expr<'a>>),
+    Literal(&'a Token<'a>),
+    Unary(&'a Token<'a>, Box<Expr<'a>>),
+    Binary(Box<Expr<'a>>, &'a Token<'a>, Box<Expr<'a,>>),
+    Expression(Box<Expr<'a>>),
+    Null,
 }

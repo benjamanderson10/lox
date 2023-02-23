@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{fmt, fmt::Display};
 
 pub struct ErrorHandler<T: Display> {
     errors: Vec<Error<T>>,
@@ -25,6 +25,7 @@ pub struct Error<T: Display> {
     pub line: usize,
     pub column: usize,
     pub message: T,
+    pub errortype: ErrorType,
 }
 
 pub enum ErrorType {
@@ -32,8 +33,17 @@ pub enum ErrorType {
     Parsing,
 }
 
+impl Display for ErrorType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", match self {
+            ErrorType::Scanning => "Scanning",
+            ErrorType::Parsing => "Parsing",
+        } )
+    }
+}
+
 impl<T: Display> Error<T> {
     pub fn report(&self) {
-        eprintln!("Error: {} @ {}:{}", self.message, self.line, self.column);
+        eprintln!("{} Error: {} @ {}:{}", self.errortype, self.message, self.line, self.column);
     }
 }

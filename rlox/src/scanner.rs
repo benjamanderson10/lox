@@ -1,7 +1,7 @@
 
 
 use crate::{
-    error::{Error, ErrorHandler},
+    error::{Error, ErrorHandler, ErrorType},
     token::{Token, TokenType},
 };
 
@@ -359,6 +359,7 @@ impl<'a, 'b> Scanner<'a, 'b> {
                                             line,
                                             column,
                                             message: format!("Failed to parse number `{}`.", &self.source[start..=idx]),
+                                            errortype: ErrorType::Scanning,
                                         });
                                         f64::NAN
                                     }
@@ -393,7 +394,12 @@ impl<'a, 'b> Scanner<'a, 'b> {
                                 }
                             }
                             None => {
-                                self.errors.push(Error { line, column, message: "Missing closing quote".to_string() });
+                                self.errors.push(Error { 
+                                    line,
+                                    column,
+                                    message: "Missing closing quote".to_string(),
+                                    errortype: ErrorType::Scanning
+                                });
                                 break;
                             }
                         }
@@ -404,6 +410,7 @@ impl<'a, 'b> Scanner<'a, 'b> {
                     line,
                     column,
                     message: format!("Unexpected character '{}'", c),
+                    errortype: ErrorType::Scanning,
                 }),
             }
             column += 1;
