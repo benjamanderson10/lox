@@ -21,18 +21,21 @@ impl<'a, 'b> Parser <'a, 'b> {
         use crate::token::TokenType::*;
         let mut hidx = 0;
         let mut high = &string[0].tokentype;
+        let mut par = 0usize;
         if string.len() >= 3 {
             for (i, a) in string.iter().map(|a| &a.tokentype).enumerate() {
-                if precedence(a, &high) {
+                if par == 0 && precedence(a, &high, par) {
                     hidx = i;
                     high = a;
                 }
+
             }
         }
 
         let e = match *high {
             EqualEqual | Greater | GreaterEqual | Less | LessEqual | Minus | MinusMinus | MinusEqual | Plus | PlusPlus | PlusEqual | Star | StarEqual | Bang | BangEqual | And | AndAnd | Or | OrOr => {println!("{}", &string[hidx]); Binary ( Parser::rec_parse(&string[0..hidx]), &string[hidx], Parser::rec_parse(&string[hidx+1..]))}
             Identifier(_) | String(_) | Number(_) => Literal (&string[hidx]),
+            LeftParen  => Grouping(Self::rec_parse(&string[..])),
             _ => Null
         };
 
@@ -40,11 +43,10 @@ impl<'a, 'b> Parser <'a, 'b> {
 
 
         
-        fn precedence(a: &TokenType, high: &TokenType) -> bool {
+        fn precedence(a: &TokenType, high: &TokenType, numpar: usize) -> bool {
             fn num(t: &TokenType) -> usize {
                 match t {
-                    Identifier(_) | String(_) | Number(_) => 6,
-                    LeftParen | RightParen => 5,
+                    Identifier(_) | String(_) | Number(_) | LeftParen | RightParen  => 6,
                     Bang => 4,
                     Star | Slash => 3,
                     Plus | Minus => 2,
