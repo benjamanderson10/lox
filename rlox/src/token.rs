@@ -1,5 +1,5 @@
-use std::fmt::Display;
 use std::fmt;
+use std::fmt::Display;
 
 #[derive(Debug, PartialEq, PartialOrd)]
 pub enum TokenType {
@@ -14,13 +14,10 @@ pub enum TokenType {
     Dot,
     Semicolon,
 
-
     // Double
     Minus,
-    MinusMinus,
     MinusEqual,
     Plus,
-    PlusPlus,
     PlusEqual,
     Star,
     StarEqual,

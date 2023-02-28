@@ -1,6 +1,10 @@
 use std::cell::RefCell;
 
-use crate::{token::{Token, TokenType}, expr::Expr, error::ErrorHandler};
+use crate::{
+    error::ErrorHandler,
+    expr::Expr,
+    token::{Token, TokenType},
+};
 
 pub struct Parser<'a, 'b> {
     pub tokens: Vec<Token<'a>>,
@@ -8,8 +12,7 @@ pub struct Parser<'a, 'b> {
     pub errorhandler: &'b mut ErrorHandler<String>,
 }
 
-impl<'a, 'b> Parser <'a, 'b> {
-
+impl<'a, 'b> Parser<'a, 'b> {
     pub fn parse_expr(&'a self) {
         use crate::expr::Expr::*;
         use crate::token::TokenType::*;
@@ -19,47 +22,71 @@ impl<'a, 'b> Parser <'a, 'b> {
     pub fn rec_parse(string: &'a [Token<'a>]) -> Box<Expr<'a>> {
         use crate::expr::Expr::*;
         use crate::token::TokenType::*;
-        let mut hidx = 0;
-        let mut high = &string[0].tokentype;
-        let mut par = 0usize;
-        if string.len() >= 3 {
-            for (i, a) in string.iter().map(|a| &a.tokentype).enumerate() {
-                if par == 0 && precedence(a, &high, par) {
-                    hidx = i;
-                    high = a;
-                }
 
+        let mut lidx = 0;
+        let mut low = usize::max_value();
+        let mut par = 0usize;
+        let mut par_max = 0usize;
+
+        if string.len() >= 1 {
+            for (i, a) in string.iter().map(|a| &a.tokentype).enumerate() {
+                if *a == LeftParen {
+                    println!("up");
+                    par += 1;
+                } else if *a == RightParen {
+                    println!("down");
+                    par -= 1;
+                } else {
+                    let p = Self::precedence(a, par);
+                    if p <= low {
+                        lidx = i;
+                        low = p;
+                        par_max = par;
+                        println!("{}: pr: {:b}, par: {}, par_max: {}, low: {low}", string[i], p, par, par_max);
+                    }
+                }
             }
         }
 
-        let e = match *high {
-            EqualEqual | Greater | GreaterEqual | Less | LessEqual | Minus | MinusMinus | MinusEqual | Plus | PlusPlus | PlusEqual | Star | StarEqual | Bang | BangEqual | And | AndAnd | Or | OrOr => {println!("{}", &string[hidx]); Binary ( Parser::rec_parse(&string[0..hidx]), &string[hidx], Parser::rec_parse(&string[hidx+1..]))}
-            Identifier(_) | String(_) | Number(_) => Literal (&string[hidx]),
-            LeftParen  => Grouping(Self::rec_parse(&string[..])),
-            _ => Null
+        for t in string {
+            print!("{} ", t);
+        }
+        println!();
+        println!("{}, {}", par, par_max);
+        let e = if par_max > 0 && par == 0 {
+            Grouping(Self::rec_parse(&string[1..(string.len() - 1)]))
+        } else {
+            match string[lidx].tokentype {
+                EqualEqual | Greater | GreaterEqual | Less | LessEqual | Minus | MinusEqual | Plus | PlusEqual | Star | StarEqual | BangEqual | And | AndAnd | Or | OrOr => {
+                    println!("{:?}", string[lidx].tokentype);
+                    Binary(Parser::rec_parse(&string[0..lidx]), &string[lidx], Parser::rec_parse(&string[lidx + 1..]))
+                }
+                Identifier(_) | String(_) | Number(_) => Literal(&string[lidx]),
+                //LeftParen => Grouping(Self::rec_parse(&string[..])),
+                _ => {
+                    println!("{:?}", string[lidx].tokentype);
+                    Null
+                }
+            }
         };
 
         return Box::new(e);
-
-
-        
-        fn precedence(a: &TokenType, high: &TokenType, numpar: usize) -> bool {
-            fn num(t: &TokenType) -> usize {
-                match t {
-                    Identifier(_) | String(_) | Number(_) | LeftParen | RightParen  => 6,
-                    Bang => 4,
-                    Star | Slash => 3,
-                    Plus | Minus => 2,
-                    _ => 1
-                }
-            }
-            println!("{a:?}{}, {high:?}{}", num(a), num(high));
-            num(high) >= num(a)
-        }
     }
-
+    fn precedence(a: &TokenType, numpar: usize) -> usize {
+        use crate::expr::Expr::*;
+        use crate::token::TokenType::*;
+        (numpar << 32)
+            | match a {
+                Identifier(_) | String(_) | Number(_) | LeftParen | RightParen => 11,
+                Bang => 9,
+                Star | Slash => 7,
+                Plus | Minus => 5,
+                LessEqual | GreaterEqual | Less | Greater => 3,
+                EqualEqual | BangEqual => 1,
+                _ => 0,
+            }
+    }
     pub fn pretty_print(&self) {
-        
         for expr in self.expressions.take() {
             println!("{}", Self::print_expr(&expr));
         }
