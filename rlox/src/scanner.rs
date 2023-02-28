@@ -1,5 +1,3 @@
-
-
 use crate::{
     error::{Error, ErrorHandler, ErrorType},
     token::{Token, TokenType},
@@ -73,24 +71,15 @@ impl<'a, 'b> Scanner<'a, 'b> {
                     src: &self.source[idx..=idx],
                 }),
 
-
                 // Double
                 '-' => {
-                    if char_iter.peek() == Some(&'-') {
-                        char_iter.next();
-                        column += 1;
-                        idx += 1;
-                        self.tokens.push(Token {
-                            tokentype: TokenType::MinusMinus,
-                            src: &self.source[idx-1..=idx],
-                        });
-                    } else if char_iter.peek() == Some(&'=') {
+                    if char_iter.peek() == Some(&'=') {
                         char_iter.next();
                         column += 1;
                         idx += 1;
                         self.tokens.push(Token {
                             tokentype: TokenType::MinusEqual,
-                            src: &self.source[idx-1..=idx],
+                            src: &self.source[idx - 1..=idx],
                         });
                     } else {
                         self.tokens.push(Token {
@@ -101,21 +90,13 @@ impl<'a, 'b> Scanner<'a, 'b> {
                 }
 
                 '+' => {
-                    if char_iter.peek() == Some(&'+') {
-                        char_iter.next();
-                        column += 1;
-                        idx += 1;
-                        self.tokens.push(Token {
-                            tokentype: TokenType::PlusPlus,
-                            src: &self.source[idx-1..=idx],
-                        });
-                    } else if char_iter.peek() == Some(&'=') {
+                    if char_iter.peek() == Some(&'=') {
                         char_iter.next();
                         column += 1;
                         idx += 1;
                         self.tokens.push(Token {
                             tokentype: TokenType::PlusEqual,
-                            src: &self.source[idx-1..=idx],
+                            src: &self.source[idx - 1..=idx],
                         });
                     } else {
                         self.tokens.push(Token {
@@ -132,7 +113,7 @@ impl<'a, 'b> Scanner<'a, 'b> {
                         idx += 1;
                         self.tokens.push(Token {
                             tokentype: TokenType::StarEqual,
-                            src: &self.source[idx-1..=idx],
+                            src: &self.source[idx - 1..=idx],
                         });
                     } else {
                         self.tokens.push(Token {
@@ -149,7 +130,7 @@ impl<'a, 'b> Scanner<'a, 'b> {
                         idx += 1;
                         self.tokens.push(Token {
                             tokentype: TokenType::SlashEqual,
-                            src: &self.source[idx-1..=idx],
+                            src: &self.source[idx - 1..=idx],
                         });
                     } else if char_iter.peek() == Some(&'/') {
                         while let Some(c) = char_iter.next() {
@@ -176,7 +157,7 @@ impl<'a, 'b> Scanner<'a, 'b> {
                         idx += 1;
                         self.tokens.push(Token {
                             tokentype: TokenType::BangEqual,
-                            src: &self.source[idx-1..=idx],
+                            src: &self.source[idx - 1..=idx],
                         });
                     } else {
                         self.tokens.push(Token {
@@ -193,7 +174,7 @@ impl<'a, 'b> Scanner<'a, 'b> {
                         idx += 1;
                         self.tokens.push(Token {
                             tokentype: TokenType::EqualEqual,
-                            src: &self.source[idx-1..=idx],
+                            src: &self.source[idx - 1..=idx],
                         });
                     } else {
                         self.tokens.push(Token {
@@ -210,7 +191,7 @@ impl<'a, 'b> Scanner<'a, 'b> {
                         idx += 1;
                         self.tokens.push(Token {
                             tokentype: TokenType::GreaterEqual,
-                            src: &self.source[idx-1..=idx],
+                            src: &self.source[idx - 1..=idx],
                         });
                     } else {
                         self.tokens.push(Token {
@@ -227,7 +208,7 @@ impl<'a, 'b> Scanner<'a, 'b> {
                         idx += 1;
                         self.tokens.push(Token {
                             tokentype: TokenType::LessEqual,
-                            src: &self.source[idx-1..=idx],
+                            src: &self.source[idx - 1..=idx],
                         });
                     } else {
                         self.tokens.push(Token {
@@ -244,7 +225,7 @@ impl<'a, 'b> Scanner<'a, 'b> {
                         idx += 1;
                         self.tokens.push(Token {
                             tokentype: TokenType::AndAnd,
-                            src: &self.source[idx-1..=idx],
+                            src: &self.source[idx - 1..=idx],
                         });
                     } else {
                         self.tokens.push(Token {
@@ -261,7 +242,7 @@ impl<'a, 'b> Scanner<'a, 'b> {
                         idx += 1;
                         self.tokens.push(Token {
                             tokentype: TokenType::OrOr,
-                            src: &self.source[idx-1..=idx],
+                            src: &self.source[idx - 1..=idx],
                         });
                     } else {
                         self.tokens.push(Token {
@@ -394,11 +375,11 @@ impl<'a, 'b> Scanner<'a, 'b> {
                                 }
                             }
                             None => {
-                                self.errors.push(Error { 
+                                self.errors.push(Error {
                                     line,
                                     column,
                                     message: "Missing closing quote".to_string(),
-                                    errortype: ErrorType::Scanning
+                                    errortype: ErrorType::Scanning,
                                 });
                                 break;
                             }

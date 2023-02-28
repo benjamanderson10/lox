@@ -5,18 +5,17 @@ pub struct ErrorHandler<T: Display> {
 }
 
 impl<T: Display> ErrorHandler<T> {
-    
     pub fn new() -> ErrorHandler<T> {
         ErrorHandler { errors: Vec::new() }
     }
-    
+
     pub fn push(&mut self, error: Error<T>) {
         self.errors.push(error);
     }
-    
-    pub fn report_errors(&self){
+
+    pub fn report_errors(&self) {
         for error in &self.errors {
-           error.report();
+            error.report();
         }
     }
 }
@@ -35,10 +34,14 @@ pub enum ErrorType {
 
 impl Display for ErrorType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", match self {
-            ErrorType::Scanning => "Scanning",
-            ErrorType::Parsing => "Parsing",
-        } )
+        write!(
+            f,
+            "{}",
+            match self {
+                ErrorType::Scanning => "Scanning",
+                ErrorType::Parsing => "Parsing",
+            }
+        )
     }
 }
 

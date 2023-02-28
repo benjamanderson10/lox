@@ -11,15 +11,17 @@ pub mod parser;
 
 pub mod expr;
 
-use std::{io::Write, env, cell::{Cell, RefCell}};
+use std::{
+    cell::{Cell, RefCell},
+    env,
+    io::Write,
+};
 
 use expr::Expr::*;
 
-use crate::{scanner::Scanner, parser::Parser, token::Token, token::TokenType, error::ErrorHandler};
+use crate::{error::ErrorHandler, parser::Parser, scanner::Scanner, token::Token, token::TokenType};
 
 fn main() {
-
-
     let args: Vec<String> = env::args().collect();
     let path = args.get(1);
     match path {
@@ -30,7 +32,6 @@ fn main() {
             repl();
         }
     }
-
 }
 
 fn runfile(file: &String) {
@@ -47,7 +48,6 @@ fn repl() {
         h.write_all(b"> ").unwrap();
         s.flush().unwrap();
 
-
         std::io::stdin().read_line(&mut input).unwrap();
         run(&input);
     }
@@ -62,7 +62,11 @@ fn run(source: &String) {
         print!("{} ", t);
     }
     println!();
-    let p = Parser { errorhandler: s.errors, tokens: s.tokens, expressions: RefCell::new(vec![]) };
+    let p = Parser {
+        errorhandler: s.errors,
+        tokens: s.tokens,
+        expressions: RefCell::new(vec![]),
+    };
     p.parse_expr();
     p.pretty_print();
     e.report_errors();
