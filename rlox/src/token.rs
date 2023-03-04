@@ -62,6 +62,8 @@ pub enum TokenType {
 pub struct Token<'a> {
     pub tokentype: TokenType,
     pub src: &'a str,
+    pub line: usize,
+    pub column: usize,
 }
 
 impl fmt::Display for Token<'_> {

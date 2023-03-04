@@ -1,7 +1,7 @@
-use std::cell::RefCell;
+use std::cell::{RefCell, RefMut};
 
 use crate::{
-    error::ErrorHandler,
+    error::{ErrorHandler, Error},
     expr::Expr,
     token::{Token, TokenType},
 };
@@ -9,17 +9,19 @@ use crate::{
 pub struct Parser<'a, 'b> {
     pub tokens: Vec<Token<'a>>,
     pub expressions: RefCell<Vec<Box<Expr<'a>>>>,
-    pub errorhandler: &'b mut ErrorHandler<String>,
+    pub errorhandler: RefMut<'b, ErrorHandler<String>>,
 }
 
 impl<'a, 'b> Parser<'a, 'b> {
-    pub fn parse_expr(&'a self) {
+
+    /// stores parsed function to expressions vec
+    pub fn parse_expr(&'a mut self) {
         use crate::expr::Expr::*;
         use crate::token::TokenType::*;
-        self.expressions.borrow_mut().push(Parser::rec_parse(&self.tokens));
+        self.expressions.borrow_mut().push(Self::rec_parse(&self.tokens, &mut self.errorhandler));
     }
-
-    pub fn rec_parse(string: &'a [Token<'a>]) -> Box<Expr<'a>> {
+    /// recursively parse an expression
+    pub fn rec_parse(string: &'a [Token<'a>], errorhandler: &mut RefMut<'b, ErrorHandler<String>>) -> Box<Expr<'a>> {
         use crate::expr::Expr::*;
         use crate::token::TokenType::*;
 
@@ -53,25 +55,39 @@ impl<'a, 'b> Parser<'a, 'b> {
         }
         println!();
         println!("{}, {}", par, par_max);
-        let e = if par_max > 0 && par == 0 {
-            Grouping(Self::rec_parse(&string[1..(string.len() - 1)]))
-        } else {
+        let e= match (par_max, par) {
+            (1.., 0) => Grouping(Self::rec_parse(&string[1..(string.len() - 1)], errorhandler)),
+            (0, 0) => {
             match string[lidx].tokentype {
                 EqualEqual | Greater | GreaterEqual | Less | LessEqual | Minus | MinusEqual | Plus | PlusEqual | Star | StarEqual | BangEqual | And | AndAnd | Or | OrOr => {
                     println!("{:?}", string[lidx].tokentype);
-                    Binary(Parser::rec_parse(&string[0..lidx]), &string[lidx], Parser::rec_parse(&string[lidx + 1..]))
+                    Binary(Self::rec_parse(&string[0..lidx], errorhandler), &string[lidx], Self::rec_parse(&string[lidx + 1..], errorhandler))
                 }
                 Identifier(_) | String(_) | Number(_) => Literal(&string[lidx]),
-                //LeftParen => Grouping(Self::rec_parse(&string[..])),
                 _ => {
                     println!("{:?}", string[lidx].tokentype);
                     Null
                 }
             }
+        }
+        (_, 0) => {
+            errorhandler.push(Error {
+                line: string[lidx].line,
+                column: string[lidx].column,
+                message: "Wrong Number of parentheses!".to_string(),
+                errortype: crate::error::ErrorType::Parsing
+            });
+            Null
+        }
+        (_, _) => {
+            Null
+        }
         };
 
         return Box::new(e);
     }
+
+    // Determines the precedence to show which operator should be grouped first
     fn precedence(a: &TokenType, numpar: usize) -> usize {
         use crate::expr::Expr::*;
         use crate::token::TokenType::*;
