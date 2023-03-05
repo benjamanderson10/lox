@@ -54,25 +54,25 @@ fn repl() {
 }
 
 fn run(source: &String) {
-    let mut e = RefCell::new(ErrorHandler::<String>::new());
+    let mut e = ErrorHandler::<String>::new();
     let mut tokens = {
-    let mut s = Scanner::new(source, e.borrow_mut());
-    s.scan();
-    println!("num tokens: {}", s.tokens.len());
-    for t in &s.tokens {
-        print!("{} ", t);
-    }
-    println!();
-    s.tokens
+        let mut s = Scanner::new(source, &mut e);
+        s.scan();
+        println!("num tokens: {}", s.tokens.len());
+        for t in &s.tokens {
+            print!("{} ", t);
+        }
+        println!();
+        s.tokens
     };
-    /*let mut p = RefCell::new(Parser {
-        errorhandler: e.borrow_mut(),
+    e.report_errors();
+    let mut p = Parser {
+        errorhandler: &mut e,
         tokens: tokens,
-        expressions: RefCell::new(vec![]),
-    });
-    let mut binding = p.borrow_mut();
-    binding.parse_expr();
-    binding.pretty_print();
-    
-    binding.errorhandler.report_errors();*/
+        expressions: vec![],
+    };
+    p.parse_expr();
+    p.pretty_print();
+
+    e.report_errors();
 }

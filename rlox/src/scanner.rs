@@ -1,17 +1,17 @@
 use crate::{
     error::{Error, ErrorHandler, ErrorType},
-    token::{Token, TokenType, self},
+    token::{self, Token, TokenType},
 };
 use std::cell::{RefCell, RefMut};
 
-pub struct Scanner<'a, 'b> {
-    pub source: &'a String,
-    pub tokens: Vec<Token<'a>>,
-    pub errors: RefMut<'b, ErrorHandler<String>>,
+pub struct Scanner<'token, 'errorhandler> {
+    pub source: &'token String,
+    pub tokens: Vec<Token<'token>>,
+    pub errors: &'errorhandler mut ErrorHandler<String>,
 }
 
-impl<'a, 'b> Scanner<'a, 'b> {
-    pub fn new(source: &'a String, errorhandler: RefMut<'b, ErrorHandler<String>>) -> Self {
+impl<'token, 'errorhandler> Scanner<'token, 'errorhandler> {
+    pub fn new(source: &'token String, errorhandler: &'errorhandler mut ErrorHandler<String>) -> Self {
         Scanner {
             source,
             tokens: Vec::new(),
@@ -27,7 +27,7 @@ impl<'a, 'b> Scanner<'a, 'b> {
 
         while let Some(c) = char_iter.next() {
             let mut src: &str = "";
-            
+
             // the token sorter
             let t: Option<TokenType> = match c {
                 // Whitespace
@@ -36,45 +36,45 @@ impl<'a, 'b> Scanner<'a, 'b> {
                     line += 1;
                     None
                 }
-                c if c.is_whitespace() => { None }
+                c if c.is_whitespace() => None,
 
                 // Single
                 '(' => {
                     src = &self.source[idx..=idx];
                     Some(TokenType::LeftParen)
-                },
+                }
                 ')' => {
-                src = &self.source[idx..=idx];
+                    src = &self.source[idx..=idx];
                     Some(TokenType::RightParen)
-                },
+                }
                 '[' => {
-                src = &self.source[idx..=idx];
+                    src = &self.source[idx..=idx];
                     Some(TokenType::LeftBrace)
-                },
+                }
                 ']' => {
-                src = &self.source[idx..=idx];
+                    src = &self.source[idx..=idx];
                     Some(TokenType::RightBrace)
-                },
+                }
                 '{' => {
-                src = &self.source[idx..=idx];
+                    src = &self.source[idx..=idx];
                     Some(TokenType::LeftCurlyBrace)
-                },
+                }
                 '}' => {
-                src = &self.source[idx..=idx];
+                    src = &self.source[idx..=idx];
                     Some(TokenType::RightCurlyBrace)
-                },
+                }
                 ',' => {
-                src = &self.source[idx..=idx];
+                    src = &self.source[idx..=idx];
                     Some(TokenType::Comma)
-                },
+                }
                 '.' => {
-                src = &self.source[idx..=idx];
+                    src = &self.source[idx..=idx];
                     Some(TokenType::Dot)
-                },
+                }
                 ';' => {
-                src = &self.source[idx..=idx];
+                    src = &self.source[idx..=idx];
                     Some(TokenType::Semicolon)
-                },
+                }
 
                 // Double
                 '-' => {
@@ -82,7 +82,7 @@ impl<'a, 'b> Scanner<'a, 'b> {
                         char_iter.next();
                         column += 1;
                         idx += 1;
-                        
+
                         src = &self.source[idx - 1..=idx];
                         Some(TokenType::MinusEqual)
                     } else {
@@ -96,11 +96,10 @@ impl<'a, 'b> Scanner<'a, 'b> {
                         char_iter.next();
                         column += 1;
                         idx += 1;
-                        
+
                         src = &self.source[idx - 1..=idx];
                         Some(TokenType::PlusEqual)
                     } else {
-                        
                         src = &self.source[idx..=idx];
                         Some(TokenType::Plus)
                     }
@@ -111,11 +110,10 @@ impl<'a, 'b> Scanner<'a, 'b> {
                         char_iter.next();
                         column += 1;
                         idx += 1;
-                        
+
                         src = &self.source[idx - 1..=idx];
                         Some(TokenType::StarEqual)
                     } else {
-                        
                         src = &self.source[idx..=idx];
                         Some(TokenType::Star)
                     }
@@ -126,7 +124,7 @@ impl<'a, 'b> Scanner<'a, 'b> {
                         char_iter.next();
                         column += 1;
                         idx += 1;
-                        
+
                         src = &self.source[idx - 1..=idx];
                         Some(TokenType::SlashEqual)
                     } else if char_iter.peek() == Some(&'/') {
@@ -141,7 +139,6 @@ impl<'a, 'b> Scanner<'a, 'b> {
                         }
                         None
                     } else {
-                        
                         src = &self.source[idx..=idx];
                         Some(TokenType::Slash)
                     }
@@ -152,11 +149,10 @@ impl<'a, 'b> Scanner<'a, 'b> {
                         char_iter.next();
                         column += 1;
                         idx += 1;
-                        
+
                         src = &self.source[idx - 1..=idx];
                         Some(TokenType::BangEqual)
                     } else {
-                        
                         src = &self.source[idx..=idx];
                         Some(TokenType::Bang)
                     }
@@ -167,11 +163,10 @@ impl<'a, 'b> Scanner<'a, 'b> {
                         char_iter.next();
                         column += 1;
                         idx += 1;
-                        
+
                         src = &self.source[idx - 1..=idx];
                         Some(TokenType::EqualEqual)
                     } else {
-                        
                         src = &self.source[idx..=idx];
                         Some(TokenType::Equal)
                     }
@@ -182,11 +177,10 @@ impl<'a, 'b> Scanner<'a, 'b> {
                         char_iter.next();
                         column += 1;
                         idx += 1;
-                        
+
                         src = &self.source[idx - 1..=idx];
                         Some(TokenType::GreaterEqual)
                     } else {
-                        
                         src = &self.source[idx..=idx];
                         Some(TokenType::Greater)
                     }
@@ -197,11 +191,10 @@ impl<'a, 'b> Scanner<'a, 'b> {
                         char_iter.next();
                         column += 1;
                         idx += 1;
-                        
+
                         src = &self.source[idx - 1..=idx];
                         Some(TokenType::LessEqual)
                     } else {
-                        
                         src = &self.source[idx..=idx];
                         Some(TokenType::Less)
                     }
@@ -212,11 +205,10 @@ impl<'a, 'b> Scanner<'a, 'b> {
                         char_iter.next();
                         column += 1;
                         idx += 1;
-                        
+
                         src = &self.source[idx - 1..=idx];
                         Some(TokenType::AndAnd)
                     } else {
-                        
                         src = &self.source[idx..=idx];
                         Some(TokenType::And)
                     }
@@ -227,11 +219,10 @@ impl<'a, 'b> Scanner<'a, 'b> {
                         char_iter.next();
                         column += 1;
                         idx += 1;
-                        
+
                         src = &self.source[idx - 1..=idx];
                         Some(TokenType::OrOr)
                     } else {
-                        
                         src = &self.source[idx..=idx];
                         Some(TokenType::Or)
                     }
@@ -239,104 +230,105 @@ impl<'a, 'b> Scanner<'a, 'b> {
 
                 c if c.is_alphabetic() || c == '_' => {
                     let start = idx;
-                    let mut tokentype: Option<TokenType>;
+                    let mut tokentype: Option<TokenType> = None;
                     while let Some(&c) = char_iter.peek() {
-                        if !(c.is_alphanumeric()) {
+                        if !(c.is_alphanumeric() || c == '_') {
                             tokentype = match &self.source[start..=idx] {
                                 "class" => {
                                     src = &self.source[start..=idx];
                                     Some(TokenType::Class)
-                                },
+                                }
                                 "else" => {
-                                src = &self.source[start..=idx];
+                                    src = &self.source[start..=idx];
                                     Some(TokenType::Else)
-                                },
+                                }
                                 "false" => {
-                                src = &self.source[start..=idx];
+                                    src = &self.source[start..=idx];
                                     Some(TokenType::False)
-                                },
+                                }
                                 "true" => {
-                                src = &self.source[start..=idx];
+                                    src = &self.source[start..=idx];
                                     Some(TokenType::True)
-                                },
+                                }
                                 "fn" => {
-                                src = &self.source[start..=idx];
+                                    src = &self.source[start..=idx];
                                     Some(TokenType::Fn)
-                                },
+                                }
                                 "for" => {
-                                src = &self.source[start..=idx];
+                                    src = &self.source[start..=idx];
                                     Some(TokenType::For)
-                                },
+                                }
                                 "if" => {
-                                src = &self.source[start..=idx];
+                                    src = &self.source[start..=idx];
                                     Some(TokenType::If)
-                                },
+                                }
                                 "nil" => {
-                                src = &self.source[start..=idx];
+                                    src = &self.source[start..=idx];
                                     Some(TokenType::Nil)
-                                },
+                                }
                                 "print" => {
-                                src = &self.source[start..=idx];
+                                    src = &self.source[start..=idx];
                                     Some(TokenType::Print)
-                                },
+                                }
                                 "return" => {
-                                src = &self.source[start..=idx];
+                                    src = &self.source[start..=idx];
                                     Some(TokenType::Return)
-                                },
+                                }
                                 "super" => {
-                                src = &self.source[start..=idx];
+                                    src = &self.source[start..=idx];
                                     Some(TokenType::Super)
-                                },
+                                }
                                 "this" => {
-                                src = &self.source[start..=idx];
+                                    src = &self.source[start..=idx];
                                     Some(TokenType::This)
-                                },
+                                }
                                 "var" => {
-                                src = &self.source[start..=idx];
+                                    src = &self.source[start..=idx];
                                     Some(TokenType::Var)
-                                },
+                                }
                                 "while" => {
-                                src = &self.source[start..=idx];
+                                    src = &self.source[start..=idx];
                                     Some(TokenType::While)
-                                },
+                                }
                                 _ => {
-                                src = &self.source[start..=idx];
+                                    src = &self.source[start..=idx];
                                     Some(TokenType::Identifier(self.source[start..=idx].to_string()))
-                                },
+                                }
                             };
-                            
+                            break;
                         }
                         column += 1;
                         idx += 1;
                         char_iter.next();
                     }
-                    None
+                    tokentype
                 }
 
                 c if c.is_numeric() => {
                     let start = idx;
-
+                    let mut tokentype: Option<TokenType> = None;
                     while let Some(&c) = char_iter.peek() {
-                        if !(c.is_numeric() || c == '_' || c == '.' || c == 'x') {
-                                match self.source[start..=idx].parse::<f64>() {
-                                    Ok(num) => Some(TokenType::Number(num)),
-                                    Err(_) => {
-                                        self.errors.push(Error {
-                                            line,
-                                            column,
-                                            message: format!("Failed to parse number `{}`.", &self.source[start..=idx]),
-                                            errortype: ErrorType::Scanning,
-                                        });
-                                        src = &self.source[start..=idx];
-                                        None
-                                    }
-                                };
+                        if !(c.is_alphanumeric() || c == '_' || c == '.') {
+                            src = &self.source[start..=idx];
+                            tokentype = match src.parse::<f64>() {
+                                Ok(num) => Some(TokenType::Number(num)),
+                                Err(_) => {
+                                    self.errors.push(Error {
+                                        line,
+                                        column,
+                                        message: format!("Failed to parse number \"{}\".", src),
+                                        errortype: ErrorType::Scanning,
+                                    });
+                                    None
+                                }
+                            };
+                            break;
                         }
                         column += 1;
                         idx += 1;
                         char_iter.next();
-                    }
-                    None
+                    };
+                    tokentype
                 }
 
                 '\"' => {
@@ -367,11 +359,12 @@ impl<'a, 'b> Scanner<'a, 'b> {
                                 break;
                             }
                         };
-                    };
+                    }
                     tt
                 }
 
-                _ => { self.errors.push(Error {
+                _ => {
+                    self.errors.push(Error {
                         line,
                         column,
                         message: format!("Unexpected character '{}'", c),
@@ -380,15 +373,10 @@ impl<'a, 'b> Scanner<'a, 'b> {
                     None
                 }
             };
-            
+
             match t {
                 Some(t) => {
-                    let token = Token {
-                        column,
-                        tokentype: t,
-                        src,
-                        line,
-                    };
+                    let token = Token { column, tokentype: t, src, line };
                     self.tokens.push(token);
                 }
                 None => {}

@@ -1,4 +1,4 @@
-use std::{fmt, fmt::Display};
+use std::{fmt, fmt::Display, io::{stdout, Write}};
 
 pub struct ErrorHandler<T: Display> {
     errors: Vec<Error<T>>,
@@ -15,7 +15,10 @@ impl<T: Display> ErrorHandler<T> {
 
     pub fn report_errors(&self) {
         for error in &self.errors {
+
             error.report();
+            stdout().flush().unwrap();
+            std::io::stderr().flush().unwrap();
         }
     }
 }
@@ -47,6 +50,7 @@ impl Display for ErrorType {
 
 impl<T: Display> Error<T> {
     pub fn report(&self) {
+
         eprintln!("{} Error: {} @ {}:{}", self.errortype, self.message, self.line, self.column);
     }
 }

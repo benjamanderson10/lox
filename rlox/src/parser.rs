@@ -1,27 +1,26 @@
 use std::cell::{RefCell, RefMut};
 
 use crate::{
-    error::{ErrorHandler, Error},
+    error::{Error, ErrorHandler},
     expr::Expr,
     token::{Token, TokenType},
 };
 
-pub struct Parser<'a, 'b> {
-    pub tokens: Vec<Token<'a>>,
-    pub expressions: RefCell<Vec<Box<Expr<'a>>>>,
-    pub errorhandler: RefMut<'b, ErrorHandler<String>>,
+pub struct Parser<'token, 'c, 'errorhandler> {
+    pub tokens: Vec<Token<'token>>,
+    pub expressions: Vec<Box<Expr<'c>>>,
+    pub errorhandler: &'errorhandler mut ErrorHandler<String>,
 }
 
-impl<'a, 'b> Parser<'a, 'b> {
-
+impl<'token,'c, 'errorhandler, > Parser<'_, '_, '_> {
     /// stores parsed function to expressions vec
-    pub fn parse_expr(&'a mut self) {
+    pub fn parse_expr(&mut self) {
         use crate::expr::Expr::*;
         use crate::token::TokenType::*;
-        self.expressions.borrow_mut().push(Self::rec_parse(&self.tokens, &mut self.errorhandler));
+        self.expressions.push(Self::rec_parse(&self.tokens, self.errorhandler));
     }
     /// recursively parse an expression
-    pub fn rec_parse(string: &'a [Token<'a>], errorhandler: &mut RefMut<'b, ErrorHandler<String>>) -> Box<Expr<'a>> {
+    pub fn rec_parse(string: &'token [Token<'token>], errorhandler: &'errorhandler mut ErrorHandler<String>) -> Box<Expr<'token>> {
         use crate::expr::Expr::*;
         use crate::token::TokenType::*;
 
@@ -49,39 +48,39 @@ impl<'a, 'b> Parser<'a, 'b> {
                 }
             }
         }
-
+        
         for t in string {
             print!("{} ", t);
         }
         println!();
         println!("{}, {}", par, par_max);
-        let e= match (par_max, par) {
+        let e = match (par_max, par) {
             (1.., 0) => Grouping(Self::rec_parse(&string[1..(string.len() - 1)], errorhandler)),
-            (0, 0) => {
-            match string[lidx].tokentype {
+            (0, 0) => match string[lidx].tokentype {
                 EqualEqual | Greater | GreaterEqual | Less | LessEqual | Minus | MinusEqual | Plus | PlusEqual | Star | StarEqual | BangEqual | And | AndAnd | Or | OrOr => {
                     println!("{:?}", string[lidx].tokentype);
-                    Binary(Self::rec_parse(&string[0..lidx], errorhandler), &string[lidx], Self::rec_parse(&string[lidx + 1..], errorhandler))
+                    Binary(
+                        Self::rec_parse(&string[0..lidx], errorhandler),
+                        &string[lidx],
+                        Self::rec_parse(&string[lidx + 1..], errorhandler),
+                    )
                 }
                 Identifier(_) | String(_) | Number(_) => Literal(&string[lidx]),
                 _ => {
                     println!("{:?}", string[lidx].tokentype);
                     Null
                 }
+            },
+            (_, 0) => {
+                errorhandler.push(Error {
+                    line: string[lidx].line,
+                    column: string[lidx].column,
+                    message: "Wrong Number of parentheses!".to_string(),
+                    errortype: crate::error::ErrorType::Parsing,
+                });
+                Null
             }
-        }
-        (_, 0) => {
-            errorhandler.push(Error {
-                line: string[lidx].line,
-                column: string[lidx].column,
-                message: "Wrong Number of parentheses!".to_string(),
-                errortype: crate::error::ErrorType::Parsing
-            });
-            Null
-        }
-        (_, _) => {
-            Null
-        }
+            (_, _) => Null,
         };
 
         return Box::new(e);
@@ -103,7 +102,7 @@ impl<'a, 'b> Parser<'a, 'b> {
             }
     }
     pub fn pretty_print(&self) {
-        for expr in self.expressions.take() {
+        for expr in &self.expressions {
             println!("{}", Self::print_expr(&expr));
         }
     }
